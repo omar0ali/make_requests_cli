@@ -181,7 +181,6 @@ func ClearScreen() {
 }
 
 func Display(data string) {
-	ClearScreen()
 	var builder strings.Builder
 	builder.WriteString(strings.Repeat("#", 50))
 	builder.WriteString(fmt.Sprintf("\n\n%v\n\n", data))

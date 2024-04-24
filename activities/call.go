@@ -8,6 +8,7 @@ import (
 )
 
 func CreatePostRequest(db *gorm.DB) {
+	ClearScreen()
 	//List all requests
 	requests := GetRequests(db)
 	if len(requests) < 1 {
@@ -19,7 +20,7 @@ func CreatePostRequest(db *gorm.DB) {
 		fmt.Println("Error: ", err)
 		return
 	}
-	fmt.Println("Selected ", requests[choice])
+	ClearScreen()
 	//Select one request
 	selectedRequest := requests[choice]
 	db.First(&selectedRequest.Template, "id = ?", selectedRequest.TemplateID)
@@ -57,6 +58,7 @@ func CreatePostRequest(db *gorm.DB) {
 }
 
 func CreateGetRequest(db *gorm.DB) {
+	ClearScreen()
 	//List all requests
 	requests := GetRequests(db)
 	if len(requests) < 1 {
@@ -68,7 +70,7 @@ func CreateGetRequest(db *gorm.DB) {
 		fmt.Println("Error: ", err)
 		return
 	}
-	fmt.Println("Selected ", requests[choice])
+	ClearScreen()
 	//Select one request and get Template
 	selectedRequest := requests[choice]
 	db.First(&selectedRequest.Template, "id = ?", selectedRequest.TemplateID)
