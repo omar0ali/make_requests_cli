@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -19,13 +20,16 @@ type Request struct {
 
 func StartCreateRequest(db *gorm.DB) {
 	ClearScreen()
+	Display("Create Request", "Leave empty to cancel")
 	name, err := Input("Name (i.e GetProjects)")
 	if err != nil {
-		log.Fatalf("Input error: %v\n", err)
+		log.Printf("Input error: %v\n", err)
+		return
 	}
 	path, err := Input("Path")
 	if err != nil {
-		log.Fatalf("Input error: %v\n", err)
+		log.Printf("Input error: %v\n", err)
+		return
 	}
 
 	listOfTemplates := GetTemplates(db)
@@ -36,21 +40,39 @@ func StartCreateRequest(db *gorm.DB) {
 		fmt.Println("Selection Failed. ", err)
 		return
 	}
+	includeData := false
+	//Will this request include data to be sent, or updating existing information
+	if err := CreateDialogYesNo("Will this request include data to be sent?", func() error {
+		includeData = true
+		return nil
+	}); err != nil {
+		fmt.Println(err)
+	}
 
-	template := listOfTemplates[selection]
-	Display(fmt.Sprintf("You have selected %v", template))
-	fmt.Println("*Filed names are case sensitive; please ensure that it matches the backend.")
 	var data []string
-	for counter := 0; ; counter++ {
-		item, err := Input(fmt.Sprintf("%v: Leave empty to stop\nEnter Filed Name", counter))
-		if err != nil {
-			fmt.Println("Error while entering data.")
-			break
+	template := listOfTemplates[selection]
+	if includeData {
+		Display(fmt.Sprintf("Selected: %v", template),
+			"(*) Fields are case sensitive.",
+			"(*) Please ensure that it matches the backend.",
+			"(*) Leave empty to stop.",
+			"(*) Type 'CANCEL' to Cancel.")
+		for counter := 0; ; counter++ {
+			item, err := Input(fmt.Sprintf(" (%v) ENTER", counter))
+			if strings.EqualFold("CANCEL", item) {
+				Display("Operation Canceled.")
+				return
+			}
+			if item == "" {
+				break
+			}
+			if err != nil {
+				Display(err.Error())
+				break
+			}
+			data = append(data, item)
 		}
-		if item == "" {
-			break
-		}
-		data = append(data, item)
+		return
 	}
 
 	jsonData, err := json.Marshal(data)
@@ -72,6 +94,7 @@ func StartCreateRequest(db *gorm.DB) {
 }
 
 func GetRequests(db *gorm.DB) []Request {
+	ClearScreen()
 	var requests []Request
 	if err := db.Find(&requests).Error; err != nil {
 		fmt.Println("Err: ", err)
@@ -80,7 +103,8 @@ func GetRequests(db *gorm.DB) []Request {
 }
 
 func DeleteRequest(db *gorm.DB) {
-	//Display list of requests
+	ClearScreen()
+	Display("Delete Request")
 	requests := GetRequests(db)
 	//Select to delete template, one last option to cancel.
 	selection, err := MakeSelection(requests)
@@ -89,7 +113,7 @@ func DeleteRequest(db *gorm.DB) {
 		return
 	}
 	//Delete
-	if err := CreateDialogYesNo(fmt.Sprintf("Are you sure?\nSelected %v will be deleted from the database.",
+	if err := CreateDialogYesNo(fmt.Sprintf("Selected %v will be deleted from the database.",
 		requests[selection]), func() error {
 		if err = db.Where("id = ?", requests[selection].ID).Delete(&Request{}).Error; err != nil {
 			return err

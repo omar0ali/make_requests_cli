@@ -3,6 +3,7 @@ package activities
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -21,30 +22,32 @@ func Draw(menu []models.MenuItem, handleClick func(models.MenuItem) bool) {
 	for {
 		for i := 0; i < len(menu); i++ {
 			if i == 0 {
-				fmt.Println(strings.Repeat("*", 50))
-				fmt.Printf("* Type %v to %v\tMAKE_REQUEST_CLI\t *\n", menu[i].ID, menu[i].Title)
-				fmt.Println(strings.Repeat("*", 50))
+				Display("MAKE REQUEST CLI", fmt.Sprintf("Type %v to %v",
+					menu[i].ID,
+					menu[i].Title))
 				continue
 			}
-			fmt.Printf("%v: %v\n", menu[i].ID, menu[i].Title)
+			fmt.Printf("  (%v): %v\n", menu[i].ID, menu[i].Title)
 		}
-		fmt.Print("ENTER: ")
+		fmt.Print("(*) ENTER: ")
 
 		if !scanner.Scan() {
-			fmt.Println("Error reading input:", scanner.Err())
+			Display(scanner.Err().Error())
 			return
 		}
 		var item models.MenuItem
 		choice, err := strconv.Atoi(strings.TrimSpace(scanner.Text()))
 		if choice < 0 || choice > len(menu) {
-			fmt.Println("Try another choice.")
+			ClearScreen()
+			Display("Try another choice.")
 			continue
 		} else {
 			item = menu[choice]
 		}
 		if err != nil {
-			fmt.Printf("Error: %v\n", err.Error())
-			return
+			ClearScreen()
+			Display(err.Error())
+			continue
 		}
 		if endSignal := handleClick(item); endSignal {
 			break
@@ -58,6 +61,9 @@ func Input(title string) (string, error) {
 	if !scanner.Scan() {
 		fmt.Println("Error reading input:", scanner.Err())
 		return "", scanner.Err()
+	}
+	if scanner.Text() == "" {
+		return "", errors.New("Canceled")
 	}
 	return strings.TrimSpace(scanner.Text()), nil
 }
@@ -76,14 +82,12 @@ func MakeSelection(lists interface{}) (int, error) {
 		return -1, fmt.Errorf("there is nothing to select")
 	}
 
-	var builder strings.Builder
-	builder.WriteString("Select one of the following:\n\n")
+	fmt.Printf("(#)Select one of the following:\n")
 	for i := 0; i < v.Len(); i++ {
-		builder.WriteString(fmt.Sprintf("%d: %v\n", i, v.Index(i)))
+		fmt.Printf(" (%d): %v\n", i, v.Index(i))
 	}
-	Display(builder.String())
 
-	choiceStr, err := Input("To cancel type any letter.\nENTER (i.e 0)")
+	choiceStr, err := Input("(*)ENTER (i.e 0)")
 	if err != nil {
 		return -1, err
 	}
@@ -93,7 +97,7 @@ func MakeSelection(lists interface{}) (int, error) {
 	}
 
 	if choice < 0 || choice >= v.Len() {
-		return -1, fmt.Errorf("MakeSelection: choice out of range")
+		return -1, errors.New("make_selection choice out of range")
 	}
 
 	return choice, nil
@@ -101,10 +105,9 @@ func MakeSelection(lists interface{}) (int, error) {
 
 func CreateDialogYesNo(title string, ifTrue func() error) error {
 	ClearScreen()
-	fmt.Println(strings.Repeat("*", 50))
 	dialog := models.CreateDialog(title)
-	fmt.Println("* ", dialog.GetQuestion())
-	choice, err := Input("* 1: Yes\t2: Cancel\n* Type 1 or 2")
+	Display(dialog.GetQuestion(), "(1): Yes    (2): No")
+	choice, err := Input("(*)ENTER ")
 	if err != nil {
 		return err
 	}
@@ -124,6 +127,7 @@ const (
 	GET    = "GET"
 	POST   = "POST"
 	DELETE = "DELETE"
+	UPDATE = "PUT"
 )
 
 func HttpRequest(method, url string, jsonData []byte) ([]byte, error) {
@@ -155,13 +159,23 @@ func HttpRequest(method, url string, jsonData []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
+	case UPDATE:
+		req, err := http.NewRequest(UPDATE, url, bytes.NewBuffer([]byte(fmt.Sprintf(`%v`, string(jsonData)))))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/json") // Set content type header
+		client := &http.Client{}
+		resp, err = client.Do(req) // Send DELETE request
+		if err != nil {
+			return nil, err
+		}
 	}
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	// Read and return response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -180,10 +194,22 @@ func ClearScreen() {
 	}
 }
 
-func Display(data string) {
+func Display(data ...string) {
+	//Take the maxWidth len after going through the data.
+	maxWidth := 35
+	for _, i := range data {
+		if maxWidth < len(i) {
+			maxWidth = len(i)
+		}
+	}
+	maxWidth = maxWidth + 5 //padding
 	var builder strings.Builder
-	builder.WriteString(strings.Repeat("#", 50))
-	builder.WriteString(fmt.Sprintf("\n\n%v\n\n", data))
-	builder.WriteString(strings.Repeat("#", 50))
+	builder.WriteString(strings.Repeat("#", maxWidth))
+	builder.WriteString(fmt.Sprintf("\n#%v#\n", strings.Repeat(" ", maxWidth-2)))
+	for _, value := range data {
+		builder.WriteString(fmt.Sprintf("# %v%v #\n", value, strings.Repeat(" ", (maxWidth-4)-len(value))))
+	}
+	builder.WriteString(fmt.Sprintf("#%v#\n", strings.Repeat(" ", maxWidth-2)))
+	builder.WriteString(strings.Repeat("#", maxWidth))
 	fmt.Println(builder.String())
 }

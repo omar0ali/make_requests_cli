@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	activities "github.com/omar0ali/make_request_cli/activities"
 	"github.com/omar0ali/make_request_cli/database"
@@ -21,16 +20,16 @@ func main() {
 	activities.Draw([]models.MenuItem{
 		models.CreateItem("Quit"),
 		models.CreateItem("Create Template"),
-		models.CreateItem("Read   Templates"),
-		models.CreateItem("Delete Template"),
 		models.CreateItem("Create Request"),
+		models.CreateItem("Read   Templates"),
 		models.CreateItem("Read   Requests"),
+		models.CreateItem("Delete Template"),
 		models.CreateItem("Delete Request"),
 		models.CreateItem("Post   HTTP request"),
 		models.CreateItem("Get    HTTP request"),
 		models.CreateItem("Delete HTTP request"),
+		models.CreateItem("Update HTTP request"),
 	}, func(item models.MenuItem) bool {
-		var builder strings.Builder
 		exitSignal := false
 		item.OnClick(func() {
 			switch item.ID {
@@ -42,38 +41,33 @@ func main() {
 					fmt.Println(err)
 				}
 			case 1:
-				fmt.Println("We will create a template.")
 				activities.StartCreateTemplate(database.DB)
 			case 2:
+				activities.StartCreateRequest(database.DB)
+			case 3:
+				activities.ClearScreen()
 				data := activities.GetTemplates(database.DB)
 				for index, templates := range data {
-					builder.WriteString(fmt.Sprintf("%v: URL:%v PORT:%v HTTP:%v\n", index, templates.URL, templates.PORT, templates.HTTPS))
+					fmt.Printf("(%v) URL:%v\n\tPORT:%v\n\tHTTP:%v\n", index, templates.URL, templates.PORT, templates.HTTPS)
 				}
-				activities.Display(builder.String())
-			case 3:
-				activities.Display("Delete Template")
-				activities.DeleteTemplate(database.DB)
 			case 4:
-				activities.Display("Create Request")
-				activities.StartCreateRequest(database.DB)
-			case 5:
+				activities.ClearScreen()
 				data := activities.GetRequests(database.DB)
 				for index, request := range data {
-					builder.WriteString(fmt.Sprintf("%v:Path: %v\tData: %v\n", index, request.PATH, request.DATA))
+					fmt.Printf("(%v) Name: %v\n\tPath: %v\n\tData: %v\n", index, request.NAME, request.PATH, request.DATA)
 				}
-				activities.Display(builder.String())
+			case 5:
+				activities.DeleteTemplate(database.DB)
 			case 6:
-				activities.Display("Delete Request")
 				activities.DeleteRequest(database.DB)
 			case 7:
-				activities.Display("POST HTTP Request")
 				activities.CreatePostRequest(database.DB)
 			case 8:
-				activities.Display("GET HTTP Request")
 				activities.CreateGetRequest(database.DB)
 			case 9:
-				activities.Display("Delete HTTP Request")
-				activities.CreatePostRequest(database.DB)
+				activities.CreateDeleteRequest(database.DB)
+			case 10:
+				activities.CreateUpdateRequest(database.DB)
 			}
 		})
 		return exitSignal

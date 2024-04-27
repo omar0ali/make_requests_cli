@@ -17,17 +17,21 @@ type Template struct {
 
 func StartCreateTemplate(db *gorm.DB) {
 	ClearScreen()
+	Display("Create Template", "Leave empty to cancel")
 	url, err := Input("URL")
 	if err != nil {
-		log.Fatalf("Input error: %v\n", err)
+		log.Printf("Input error: %v\n", err)
+		return
 	}
 	port, err := Input("Port Number")
 	if err != nil {
-		log.Fatalf("Input error: %v\n", err)
+		log.Printf("Input error: %v\n", err)
+		return
 	}
 	https, err := Input("Https (y or n)")
 	if err != nil {
-		log.Fatalf("Input error: %v\n", err)
+		log.Printf("Input error: %v\n", err)
+		return
 	}
 	var htps bool
 	if strings.EqualFold(https, "y") || strings.EqualFold(https, "yes") {
@@ -50,6 +54,8 @@ func GetTemplates(db *gorm.DB) []Template {
 }
 
 func DeleteTemplate(db *gorm.DB) {
+	ClearScreen()
+	Display("Delete Template", "Leave empty to cancel")
 	//Display list of templates
 	templates := GetTemplates(db)
 	//Select to delete template, one last option to cancel.
@@ -59,7 +65,8 @@ func DeleteTemplate(db *gorm.DB) {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
-	if err := CreateDialogYesNo(fmt.Sprintf("Are you sure?\nSelected %v will be deleted from the database.", templates[selection]), func() error {
+	if err := CreateDialogYesNo(fmt.Sprintf("Selected %v will be deleted from the database.",
+		templates[selection]), func() error {
 		if err = db.Where("id=?", &templates[selection].ID).Delete(&Template{}).Error; err != nil {
 			return err
 		}
