@@ -15,6 +15,6 @@ func CreateItem(title string) MenuItem {
 	}
 }
 
-func (item *MenuItem) OnClick(clickHandler func()) {
+func (item MenuItem) OnClick(clickHandler func()) {
 	clickHandler()
 }

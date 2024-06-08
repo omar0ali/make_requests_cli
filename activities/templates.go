@@ -53,6 +53,12 @@ func GetTemplates(db *gorm.DB) []Template {
 	return templates
 }
 
+func DisplayTemplates(data []Template) {
+	for index, templates := range data {
+		fmt.Printf("(%v) URL:%v\n\tPORT:%v\n\tHTTP:%v\n", index, templates.URL, templates.PORT, templates.HTTPS)
+	}
+}
+
 func DeleteTemplate(db *gorm.DB) {
 	ClearScreen()
 	Display("Delete Template", "Leave empty to cancel")

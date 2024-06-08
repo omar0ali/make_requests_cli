@@ -68,11 +68,10 @@ func StartCreateRequest(db *gorm.DB) {
 			}
 			if err != nil {
 				Display(err.Error())
-				break
+				return
 			}
 			data = append(data, item)
 		}
-		return
 	}
 
 	jsonData, err := json.Marshal(data)
@@ -80,17 +79,13 @@ func StartCreateRequest(db *gorm.DB) {
 		fmt.Println("Error converting to json.")
 		return
 	}
-
-	err = db.Create(&Request{
+	db.Create(&Request{
 		NAME:       name,
 		PATH:       path,
 		TemplateID: template.ID,
 		Template:   template,
 		DATA:       string(jsonData),
-	}).Error
-	if err != nil {
-		log.Fatalf("Error creating request: %v\n", err)
-	}
+	})
 }
 
 func GetRequests(db *gorm.DB) []Request {
@@ -100,6 +95,12 @@ func GetRequests(db *gorm.DB) []Request {
 		fmt.Println("Err: ", err)
 	}
 	return requests
+}
+
+func DisplayRequests(data []Request) {
+	for index, request := range data {
+		fmt.Printf("(%v) Name: %v\n\tPath: %v\n\tData: %v\n", index, request.NAME, request.PATH, request.DATA)
+	}
 }
 
 func DeleteRequest(db *gorm.DB) {

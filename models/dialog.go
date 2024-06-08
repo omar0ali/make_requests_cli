@@ -15,11 +15,11 @@ func (d *Dialog) SetChoice(t bool) {
 	d.choice = t
 }
 
-func (d *Dialog) GetQuestion() string {
+func (d Dialog) GetQuestion() string {
 	return d.title
 }
 
-func (d *Dialog) OnClick(checkHandler func()) {
+func (d Dialog) OnClick(checkHandler func()) {
 	if d.choice {
 		checkHandler()
 	}
