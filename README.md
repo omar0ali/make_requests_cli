@@ -59,12 +59,6 @@ func main() {
 }
 ```
 
-### Whats not working:
-
--   HTTP GET
--   HTTP DELETE
--   HTTP UPDATE
-
 ## Notes
 
 -   The application provides guidance and reminders throughout the process, such as reminding users that field names are case-sensitive and should match the backend.
