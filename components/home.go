@@ -20,7 +20,7 @@ func HomePage(app *tview.Application, pages *tview.Pages, db *gorm.DB) *tview.Fl
 		SetDirection(tview.FlexRow).
 		AddItem(readTemplates(db), 0, 1, true)
 	rightTitleTop.SetBorder(true).
-		SetTitle("Templates Details - CTRL+T").
+		SetTitle(" Templates Details - CTRL+T ").
 		SetTitleAlign(tview.AlignCenter).
 		SetBorderColor(tcell.ColorYellow)
 		//------------------------------------------------------------------//
@@ -29,35 +29,35 @@ func HomePage(app *tview.Application, pages *tview.Pages, db *gorm.DB) *tview.Fl
 		SetDirection(tview.FlexRow).
 		AddItem(readRequests(db), 0, 1, true)
 	rightTitleBottom.SetBorder(true).
-		SetTitle("Requests Details - CTRL+R").
+		SetTitle(" Requests Details - CTRL+R ").
 		SetTitleAlign(tview.AlignCenter).
 		SetBorderColor(tcell.ColorYellow)
 
 		//------------------------------------------------------------------//
 	list := tview.NewList().
 		AddItem("Create Template",
-			"Template requires a url, port number. Will be used to create Requests.", '1', func() {
-				pages.SwitchToPage("TemplatePage")
+			"Template requires a url, port number.", '1', func() {
+				pages.SwitchToPage(TEMPLATE_PAGE)
 			}).
 		AddItem("Create Request",
-			"Create Request, must be already created template to choose from.", '2', func() {
-				pages.SwitchToPage("RequestPage")
+			"Request requires an existant template, path and some data.", '2', func() {
+				pages.SwitchToPage(REQUEST_PAGE)
 			}).
 		AddItem("Post HTTP Request",
 			"Make a post request. Note: Must already have Post requests created.", '3', func() {
-				pages.SwitchToPage("PostPage")
+				pages.SwitchToPage(POST_PAGE)
 			}).
 		AddItem("Get HTTP Request",
 			"Make a get request. Note: Must already have Get requests created.", '4', func() {
-				pages.SwitchToPage("delete_request")
+				pages.SwitchToPage(GET_PAGE)
 			}).
 		AddItem("Delete HTTP Request",
 			"Make a delete request.", '5', func() {
-				pages.SwitchToPage("delete_request")
+				pages.SwitchToPage(DELETE_PAGE)
 			}).
 		AddItem("Update HTTP Request",
 			"Make an update request.", '6', func() {
-				pages.SwitchToPage("delete_request")
+				pages.SwitchToPage(UPDATE_PAGE)
 			}).
 		AddItem("Quit", "Press to exit", 'q', func() {
 			app.Stop()
@@ -73,7 +73,7 @@ func HomePage(app *tview.Application, pages *tview.Pages, db *gorm.DB) *tview.Fl
 		AddItem(tview.NewTextView().
 			SetText("Select an option from 1 to 6, you can:\n(*) Create, read, and delete templates.\n(*) Create, read, and delete requests.\n(*) Send HTTP POST, GET, and DELETE requests.\n(*) Interactive user interface for easy operation.").SetTextColor(tcell.ColorGreenYellow), 0, 1, true)
 	boxMidText.SetBorder(true).
-		SetTitle("Instructions").
+		SetTitle(" Instructions ").
 		SetTitleAlign(tview.AlignCenter).
 		SetBorderColor(tcell.ColorDarkGreen)
 		//------------------------------------------------------------------//
@@ -91,7 +91,7 @@ func HomePage(app *tview.Application, pages *tview.Pages, db *gorm.DB) *tview.Fl
 		AddItem(list, 0, 1, true).
 		AddItem(bottomText, 2, 1, false)
 	leftFlex.SetBorder(true)
-	leftFlex.SetTitle("Home Page - Tab Key")
+	leftFlex.SetTitle(" Home Page - Tab Key ")
 
 	// Right side flex container (split horizontally)
 	rightFlex := tview.NewFlex().SetDirection(tview.FlexRow).
@@ -137,7 +137,7 @@ func readTemplates(db *gorm.DB) *tview.Flex {
 	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyCtrlD:
-			//We need to remove it from the actuall database.
+			//TODO: We need to remove it from the actuall database.
 			list.RemoveItem(list.GetCurrentItem())
 		}
 		return event
@@ -172,7 +172,7 @@ func readRequests(db *gorm.DB) *tview.Flex {
 	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyCtrlD:
-			//We need to remove it from the actuall database.
+			//TODO: We need to remove it from the actuall database.
 			list.RemoveItem(list.GetCurrentItem())
 		}
 		return event

@@ -87,7 +87,7 @@ func CreateRequestPage(app *tview.Application, pages *tview.Pages, db *gorm.DB) 
 				DATA:       string(jsonData),
 			})
 			ShowPopup(app, pages, "You have successfully created a new request!", func() {
-				GoToPage("HomePage", app, pages, db)
+				GoToPage(HOME_PAGE, app, pages, db, true)
 			})
 		})
 	//Select a template from a list.

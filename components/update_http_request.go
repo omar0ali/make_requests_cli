@@ -10,19 +10,14 @@ import (
 	"gorm.io/gorm"
 )
 
-var (
-	selectedRequest activities.Request
-	listInputs      []*tview.InputField
-)
-
-func PostHTTPRequest(app *tview.Application, pages *tview.Pages, db *gorm.DB) *tview.Flex {
+func UpdateHTTPRequest(app *tview.Application, pages *tview.Pages, db *gorm.DB) *tview.Flex {
 	topView := tview.NewTextView().
-		SetText(CenterTextVertically("HTTP Post Request.", 4)).
+		SetText(CenterTextVertically("HTTP Update Request.", 4)).
 		SetDynamicColors(true).SetTextAlign(tview.AlignCenter)
 
-	//First Select a request
+	// First Select a request
 	listRequest := createListRequests(db)
-	//Prepare midview
+	// Prepare midview
 	midView := tview.NewFlex()
 	midView.SetDirection(tview.FlexRow)
 	midViewTextDetials := tview.NewTextView()
@@ -67,7 +62,7 @@ func PostHTTPRequest(app *tview.Application, pages *tview.Pages, db *gorm.DB) *t
 				}
 				//We make the call
 				//Call request.
-				body, err := activities.HttpRequest(activities.POST, activities.ConstructURL(selectedRequest), jsonData)
+				body, err := activities.HttpRequest(activities.UPDATE, activities.ConstructURL(selectedRequest), jsonData)
 				if err != nil {
 					ShowPopup(app, pages, fmt.Sprintf("Error: %v", err), func() {
 						GoToPage(HOME_PAGE, app, pages, db, true)
@@ -93,22 +88,8 @@ func PostHTTPRequest(app *tview.Application, pages *tview.Pages, db *gorm.DB) *t
 		AddItem(listRequest, 10, 1, true).
 		AddItem(midView, 0, 1, true).
 		AddItem(bottomView, 3, 1, false)
-
 	view.SetDirection(tview.FlexRow)
 	view.SetBorder(true)
-	view.SetTitle("HTTP POST REQUEST")
+	view.SetTitle("HTTP UPDATE REQUEST")
 	return view
-}
-
-func createListRequests(db *gorm.DB) *tview.List {
-	list := tview.NewList()
-	list.SetBorder(true)
-	list.SetBorderColor(tcell.ColorYellow)
-	requests := activities.GetRequests(db)
-	for _, v := range requests {
-		list.AddItem(fmt.Sprintf("(%d) %v", v.ID, v.NAME), "", 0, nil)
-	}
-	list.SetTitle("Select a Request")
-
-	return list
 }

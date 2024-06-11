@@ -11,7 +11,6 @@ func ShowPopup(app *tview.Application, pages *tview.Pages, message string, btn f
 			pages.RemovePage("modal")
 			btn()
 		})
-
 	// Add the modal to the pages
 	pages.AddPage("modal", modal, true, true)
 	app.SetFocus(modal)

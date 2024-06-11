@@ -82,7 +82,7 @@ func CreateTemplatePage(app *tview.Application, pages *tview.Pages, db *gorm.DB)
 				urlInput.SetText("")
 				portInput.SetText("")
 				app.SetFocus(urlInput)
-				GoToPage("HomePage", app, pages, db)
+				GoToPage(HOME_PAGE, app, pages, db, true)
 			})
 		})
 
